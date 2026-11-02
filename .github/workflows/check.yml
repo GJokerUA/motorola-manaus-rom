@@ -1,0 +1,56 @@
+
+name: Motorola ROM Build Environment Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: System information
+        run: |
+          echo "===== CPU ====="
+          nproc
+          lscpu | head -20
+
+          echo "===== RAM ====="
+          free -h
+
+          echo "===== DISK ====="
+          df -h /
+
+      - name: Check build tools
+        run: |
+          echo "===== GIT ====="
+          git --version
+
+          echo "===== JAVA ====="
+          java -version
+
+          echo "===== PYTHON ====="
+          python3 --version
+
+          echo "===== REPO ====="
+          if command -v repo >/dev/null 2>&1; then
+            repo version
+          else
+            echo "repo tool not installed"
+          fi
+
+      - name: Check Android source access
+        run: |
+          echo "===== ANDROID ====="
+          git ls-remote https://android.googlesource.com/platform/manifest HEAD
+
+          echo "===== GITHUB ====="
+          git ls-remote https://github.com/LineageOS/android.git HEAD
+
+      - name: Final report
+        run: |
+          echo "===== ENVIRONMENT TEST COMPLETED ====="
+          df -h /
+          free -h
+          nproc
