@@ -1,0 +1,1 @@
+# motorola-manaus-rom
