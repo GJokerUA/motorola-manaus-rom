@@ -1,27 +1,39 @@
 
-name: Motorola Manaus Device Tree Check
+name: Manaus Source Audit
 
 on:
   workflow_dispatch:
 
 jobs:
-  device:
+  audit:
     runs-on: ubuntu-latest
     steps:
-      - name: Clone device tree
+      - name: Check source repositories
+        run: |
+          for repo in \
+            device_motorola_manaus \
+            vendor_motorola_manaus \
+            kernel_motorola_manaus
+          do
+            echo "===== $repo ====="
+            git ls-remote \
+              "https://github.com/RyannBreston/$repo.git" HEAD \
+              || true
+          done
+
+      - name: Check device tree
         run: |
           git clone --depth=1 \
-            -b device_motorola_manaus \
             https://github.com/RyannBreston/device_motorola_manaus.git \
             device
 
-      - name: Inspect device tree
-        run: |
           cd device
-          echo "===== FILES ====="
-          ls -la
-          echo "===== PRODUCT FILES ====="
-          find . -maxdepth 3 \
-            -type f \( -name "*.mk" -o -name "*.bp" -o -name "*.xml" \)
-          echo "===== README ====="
-          cat README.md
+
+          echo "===== BRANCH ====="
+          git branch -a
+
+          echo "===== BOARD CONFIG ====="
+          grep -nE 'TARGET_|BOARD_|KERNEL_' BoardConfig.mk
+
+          echo "===== MANIFEST PROJECTS ====="
+          grep -n '<project' manifest.xml
